@@ -1,37 +1,41 @@
 #include <cstdlib>
 
 #include "cli/cli.h"
-#include "libudp/logger.h"
+#include "ut/logger.h"
 
 int main(int argc, char* argv[]) {
   try {
     cli::Options options;
+    using Ints = cli::Array_value<int>;
+    using Strings = cli::Array_value<std::string>;
+    using Limits = cli::Map_value<std::string, int>;
+    using Metadata = cli::Map_value<std::string, std::string>;
 
     /* Array options */
-    options.add_option<cli::Array_value<std::string>>({
-      .long_name = "hosts",
-      .description = "List of host addresses",
-      .default_value = "localhost:8080,localhost:8081",
-      .env_var = "APP_HOSTS"
+    options.add_option<Strings>({
+      .m_long_name = "hosts",
+      .m_description = "List of host addresses",
+      .m_default_value = Strings({"localhost:8080", "localhost:8081"}),
+      .m_env_var = "APP_HOSTS"
     });
 
-    options.add_option<cli::Array_value<int>>({
-      .long_name = "ports",
-      .description = "List of ports",
-      .default_value = "8080,8081,8082"
+    options.add_option<Ints>({
+      .m_long_name = "ports",
+      .m_description = "List of ports",
+      .m_default_value = Ints({8080, 8081, 8082})
     });
 
     /* Map options */
-    options.add_option<cli::Map_value<std::string, int>>({
-      .long_name = "limits",
-      .description = "Resource limits",
-      .default_value = "cpu=4,memory=1024,connections=100"
+    options.add_option<Limits>({
+      .m_long_name = "limits",
+      .m_description = "Resource limits",
+      .m_default_value = Limits({{"cpu", 4}, {"memory", 1024}, {"connections", 100}})
     });
 
-    options.add_option<cli::Map_value<std::string, std::string>>({
-      .long_name = "metadata",
-      .description = "Additional metadata",
-      .default_value = "env=prod,region=us-west,tier=premium"
+    options.add_option<Metadata>({
+      .m_long_name = "metadata",
+      .m_description = "Additional metadata",
+      .m_default_value = Metadata({{"env", "prod"}, {"region", "us-west"}, {"tier", "premium"}})
     });
 
     if (!options.parse(argc, argv)) {
@@ -40,14 +44,14 @@ int main(int argc, char* argv[]) {
     }
 
     /* Access array values */
-    if (auto hosts = options.get<cli::Array_value<std::string>>("hosts")) {
+    if (auto hosts = options.get<Strings>("hosts")) {
       log_info("Configured hosts:");
       for (const auto& host : *hosts) {
         log_info("  - ", host);
       }
     }
 
-    if (auto ports = options.get<cli::Array_value<int>>("ports")) {
+    if (auto ports = options.get<Ints>("ports")) {
       log_info("Configured ports:");
       for (const auto& port : *ports) {
         log_info("  - ", port);
@@ -55,7 +59,7 @@ int main(int argc, char* argv[]) {
     }
 
     /* Access map values */
-    if (auto limits = options.get<cli::Map_value<std::string, int>>("limits")) {
+    if (auto limits = options.get<Limits>("limits")) {
       log_info("Resource limits:");
       for (const auto& [resource, limit] : limits->values()) {
         log_info("  ", resource, ": ", limit);

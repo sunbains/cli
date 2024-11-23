@@ -84,10 +84,10 @@ TEST_F(Map_value_test, ParseIntMap) {
 
 TEST_F(Map_value_test, ToString) {
   cli::Map_value<std::string, int> map({{"a", 1}, {"b", 2}});
-  EXPECT_EQ(map.to_string(), "a=1,b=2");
+  EXPECT_EQ(map.to_string(), "{a=1},{b=2}");
 
   cli::Map_value<std::string, std::string> str_map({{"key1", "value1"}, {"key2", "value2"}});
-  EXPECT_EQ(str_map.to_string(), "key1=value1,key2=value2");
+  EXPECT_EQ(str_map.to_string(), "{key1=value1},{key2=value2}");
 }
 
 TEST_F(Map_value_test, InvalidInput) {

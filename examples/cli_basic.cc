@@ -1,31 +1,33 @@
+#include <cstdlib>
+
 #include "cli/cli.h"
-#include "libudp/logger.h"
+#include "ut/logger.h"
 
 int main(int argc, char* argv[]) {
   try {
     cli::Options options;
 
     options.add_option<bool>({
-      .short_name = "v",
-      .long_name = "verbose",
-      .description = "Enable verbose output",
-      .default_value = "false"
+      .m_short_name = "v",
+      .m_long_name = "verbose",
+      .m_description = "Enable verbose output",
+      .m_default_value = false
     });
 
     options.add_option<int>({
-      .short_name = "p",
-      .long_name = "port",
-      .description = "Port number",
-      .required = true,
-      .default_value = "8080",
-      .env_var = "APP_PORT"
+      .m_short_name = "p",
+      .m_long_name = "port",
+      .m_description = "Port number",
+      .m_required = true,
+      .m_default_value = 8080,
+      .m_env_var = "APP_PORT"
     });
 
     options.add_option<std::string>({
-      .short_name = "h",
-      .long_name = "host",
-      .description = "Host address",
-      .default_value = "localhost"
+      .m_short_name = "h",
+      .m_long_name = "host",
+      .m_description = "Host address",
+      .m_default_value = std::string{"localhost"}
     });
 
     if (!options.parse(argc, argv)) {
@@ -43,9 +45,9 @@ int main(int argc, char* argv[]) {
     auto host = options.get<std::string>("host").value_or("localhost");
     log_info("Host: ", host);
 
-    return 0;
+    return EXIT_SUCCESS;
   } catch (const std::exception& e) {
     log_error(e.what());
-    return 1;
+    return EXIT_FAILURE;
   }
 }

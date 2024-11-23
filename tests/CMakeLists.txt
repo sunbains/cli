@@ -1,5 +1,7 @@
 message(STATUS "Building tests")
 
+project(TESTS)
+
 enable_testing()
 
 # Include FetchContent for downloading GTest
@@ -16,27 +18,25 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(googletest)
 
-add_executable(cli_tests ${CMAKE_SOURCE_DIR}/src/cli.cc cli_tests.cc)
-add_executable(cli_collection_tests ${CMAKE_SOURCE_DIR}/src/cli.cc cli_collections_test.cc)
+add_executable(cli_tests cli_tests.cc)
+add_executable(cli_collection_tests cli_collections_test.cc)
 
 target_link_libraries(cli_collection_tests
   PRIVATE
-  ${PROJECT_NAME}
-  GTest::gtest_main
-  GTest::gmock_main
-  ${PROJECT_NAME}
+    GTest::gtest_main
+    GTest::gmock_main
 )
 
 target_link_libraries(cli_tests
   PRIVATE
-  ${PROJECT_NAME}
-  GTest::gtest_main
-  GTest::gmock_main
-  ${PROJECT_NAME}
+    GTest::gtest_main
+    GTest::gmock_main
 )
 
-target_include_directories(cli_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include)
-target_include_directories(cli_collection_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include)
+set(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/logger/include)
+
+target_include_directories(cli_tests PRIVATE ${INCLUDE_DIRS})
+target_include_directories(cli_collection_tests PRIVATE ${INCLUDE_DIRS})
 
 include(GoogleTest)
 

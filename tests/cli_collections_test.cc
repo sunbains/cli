@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <sstream>
 
-#include "cli/cli.hpp"
+#include "cli/cli.h"
 
 class Array_options_test : public ::testing::Test {
 protected:
@@ -12,27 +12,27 @@ protected:
   void add_test_options() {
     // Add array options of different types
     m_options->add_option<cli::Array_value<int>>({
-      .long_name = "numbers",
-      .description = "List of numbers",
-      .default_value = "1,2,3"
+      .m_long_name = "numbers",
+      .m_description = "List of numbers",
+      .m_default_value = cli::Array_value<int>({1, 2, 3})
     });
 
     m_options->add_option<cli::Array_value<std::string>>({
-      .long_name = "names",
-      .description = "List of names",
-      .default_value = "alice,bob,charlie"
+      .m_long_name = "names",
+      .m_description = "List of names",
+      .m_default_value = cli::Array_value<std::string>({"alice", "bob", "charlie"})
     });
 
     m_options->add_option<cli::Array_value<bool>>({
-      .long_name = "flags",
-      .description = "List of boolean flags",
-      .default_value = "true,false,1,0"
+      .m_long_name = "flags",
+      .m_description = "List of boolean flags",
+      .m_default_value = cli::Array_value<bool>({true, false, true, false})
     });
 
     m_options->add_option<cli::Array_value<double>>({
-      .long_name = "values",
-      .description = "List of decimal values",
-      .default_value = "1.1,2.2,3.3"
+      .m_long_name = "values",
+      .m_description = "List of decimal values",
+      .m_default_value = cli::Array_value<double>({1.1, 2.2, 3.3})
     });
   }
 
@@ -81,15 +81,15 @@ TEST_F(Array_options_test, CommandLineOverride) {
 
 TEST_F(Array_options_test, EmptyArrays) {
   m_options->add_option<cli::Array_value<int>>({
-    .long_name = "empty",
-    .description = "Empty array"
+    .m_long_name = "empty",
+    .m_description = "Empty array"
   });
 
   const char* argv[] = {"program", "--empty="};
   ASSERT_TRUE(m_options->parse(2, const_cast<char**>(argv)));
 
   auto empty = m_options->get<cli::Array_value<int>>("empty");
-  ASSERT_TRUE(empty.has_value());
+  EXPECT_TRUE(empty.has_value());
   EXPECT_TRUE(empty->values().empty());
 }
 
@@ -116,8 +116,8 @@ TEST_F(Array_options_test, BooleanArrayParsing) {
 
 TEST_F(Array_options_test, InvalidValues) {
   m_options->add_option<cli::Array_value<int>>({
-    .long_name = "numbers",
-    .description = "List of numbers"
+    .m_long_name = "numbers",
+    .m_description = "List of numbers"
   });
 
   const char* argv[] = {"program", "--numbers=1,invalid,3"};
@@ -131,28 +131,28 @@ protected:
   }
 
   void add_test_options() {
-    m_options->add_option<cli::Map_value<int>>({
-      .long_name = "limits",
-      .description = "Resource limits",
-      .default_value = "cpu=4,memory=1024,connections=100"
+    m_options->add_option<cli::Map_value<std::string, int>>({
+      .m_long_name = "limits",
+      .m_description = "Resource limits",
+      .m_default_value = cli::Map_value<std::string, int>({{"cpu", 4}, {"memory", 1024}, {"connections", 100}})
     });
 
-    m_options->add_option<cli::Map_value<std::string>>({
-      .long_name = "config",
-      .description = "Configuration values",
-      .default_value = "env=prod,region=us-west,tier=premium"
+    m_options->add_option<cli::Map_value<std::string, std::string>>({
+      .m_long_name = "config",
+      .m_description = "Configuration values",
+      .m_default_value = cli::Map_value<std::string, std::string>({{"env", "prod"}, {"region", "us-west"}, {"tier", "premium"}})
     });
 
-    m_options->add_option<cli::Map_value<bool>>({
-      .long_name = "features",
-      .description = "Feature flags",
-      .default_value = "logging=true,debug=false,verbose=yes"
+    m_options->add_option<cli::Map_value<std::string, bool>>({
+      .m_long_name = "features",
+      .m_description = "Feature flags",
+      .m_default_value = cli::Map_value<std::string, bool>({{"logging", true}, {"debug", false}, {"verbose", true}})
     });
 
-    m_options->add_option<cli::Map_value<double>>({
-      .long_name = "metrics",
-      .description = "Metric values",
-      .default_value = "threshold=0.85,factor=1.5"
+    m_options->add_option<cli::Map_value<std::string, double>>({
+      .m_long_name = "metrics",
+      .m_description = "Metric values",
+      .m_default_value = cli::Map_value<std::string, double>({{"threshold", 0.85}, {"factor", 1.5}})
     });
   }
 
@@ -164,14 +164,14 @@ TEST_F(Map_options_test, DefaultValues) {
   const char* argv[] = {"program"};
   ASSERT_TRUE(m_options->parse(1, const_cast<char**>(argv)));
 
-  auto limits = m_options->get<cli::Map_value<int>>("limits");
+  auto limits = m_options->get<cli::Map_value<std::string, int>>("limits");
   ASSERT_TRUE(limits.has_value());
   EXPECT_EQ(limits->values().size(), 3);
   EXPECT_EQ(limits->at("cpu"), 4);
   EXPECT_EQ(limits->at("memory"), 1024);
   EXPECT_EQ(limits->at("connections"), 100);
 
-  auto config = m_options->get<cli::Map_value<std::string>>("config");
+  auto config = m_options->get<cli::Map_value<std::string, std::string>>("config");
   ASSERT_TRUE(config.has_value());
   EXPECT_EQ(config->values().size(), 3);
   EXPECT_EQ(config->at("env"), "prod");
@@ -187,13 +187,13 @@ TEST_F(Map_options_test, CommandLineOverride) {
   };
   ASSERT_TRUE(m_options->parse(3, const_cast<char**>(argv)));
 
-  auto limits = m_options->get<cli::Map_value<int>>("limits");
+  auto limits = m_options->get<cli::Map_value<std::string, int>>("limits");
   ASSERT_TRUE(limits.has_value());
   EXPECT_EQ(limits->values().size(), 2);
   EXPECT_EQ(limits->at("cpu"), 8);
   EXPECT_EQ(limits->at("memory"), 2048);
 
-  auto config = m_options->get<cli::Map_value<std::string>>("config");
+  auto config = m_options->get<cli::Map_value<std::string, std::string>>("config");
   ASSERT_TRUE(config.has_value());
   EXPECT_EQ(config->values().size(), 2);
   EXPECT_EQ(config->at("env"), "dev");
@@ -201,15 +201,15 @@ TEST_F(Map_options_test, CommandLineOverride) {
 }
 
 TEST_F(Map_options_test, EmptyMap) {
-  m_options->add_option<cli::Map_value<int>>({
-    .long_name = "empty",
-    .description = "Empty map"
+  m_options->add_option<cli::Map_value<std::string, int>>({
+    .m_long_name = "empty",
+    .m_description = "Empty map"
   });
 
   const char* argv[] = {"program", "--empty="};
   ASSERT_TRUE(m_options->parse(2, const_cast<char**>(argv)));
 
-  auto empty = m_options->get<cli::Map_value<int>>("empty");
+  auto empty = m_options->get<cli::Map_value<std::string, int>>("empty");
   ASSERT_TRUE(empty.has_value());
   EXPECT_TRUE(empty->values().empty());
 }
@@ -222,7 +222,7 @@ TEST_F(Map_options_test, BooleanMapParsing) {
   };
   ASSERT_TRUE(m_options->parse(2, const_cast<char**>(argv)));
 
-  auto features = m_options->get<cli::Map_value<bool>>("features");
+  auto features = m_options->get<cli::Map_value<std::string, bool>>("features");
   ASSERT_TRUE(features.has_value());
   EXPECT_EQ(features->values().size(), 8);
   EXPECT_TRUE(features->at("a"));   // true
@@ -236,9 +236,9 @@ TEST_F(Map_options_test, BooleanMapParsing) {
 }
 
 TEST_F(Map_options_test, InvalidKeyValuePairs) {
-  m_options->add_option<cli::Map_value<int>>({
-    .long_name = "invalid",
-    .description = "Invalid map"
+  m_options->add_option<cli::Map_value<std::string, int>>({
+    .m_long_name = "invalid",
+    .m_description = "Invalid map"
   });
 
   const char* argv[] = {"program", "--invalid=key1:value1,key2=invalid"};
@@ -246,15 +246,15 @@ TEST_F(Map_options_test, InvalidKeyValuePairs) {
 }
 
 TEST_F(Map_options_test, WhitespaceHandling) {
-  m_options->add_option<cli::Map_value<int>>({
-    .long_name = "spacing",
-    .description = "Map with whitespace"
+  m_options->add_option<cli::Map_value<std::string, int>>({
+    .m_long_name = "spacing",
+    .m_description = "Map with whitespace"
   });
 
   const char* argv[] = {"program", "--spacing= key1 = 100 , key2 = 200 "};
   ASSERT_TRUE(m_options->parse(2, const_cast<char**>(argv)));
 
-  auto spacing = m_options->get<cli::Map_value<int>>("spacing");
+  auto spacing = m_options->get<cli::Map_value<std::string, int>>("spacing");
   ASSERT_TRUE(spacing.has_value());
   EXPECT_EQ(spacing->values().size(), 2);
   EXPECT_EQ(spacing->at("key1"), 100);
