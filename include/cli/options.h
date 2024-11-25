@@ -54,29 +54,6 @@ struct Option_descriptor {
   std::optional<std::string> m_env_var;
 };
 
-using String_to_int_map = std::map<std::string, int>;
-using String_to_double_map = std::map<std::string, double>;
-using String_to_string_map = std::map<std::string, std::string>;
-using String_to_bool_map = std::map<std::string, bool>;
-
-using Int_array = std::vector<int>;
-using Bool_array = std::vector<bool>;
-using Double_array = std::vector<double>;
-using String_array = std::vector<std::string>;
-
-template<typename T>
-concept Parseable = requires(std::string s) {
-  { std::stoi(s) } -> std::convertible_to<T>; }
-  || std::same_as<T, typename T::scalar_type>
-  || std::same_as<T, Int_array>
-  || std::same_as<T, Bool_array>
-  || std::same_as<T, Double_array>
-  || std::same_as<T, String_array>
-  || std::same_as<T, String_to_int_map::mapped_type>
-  || std::same_as<T, String_to_double_map::mapped_type>
-  || std::same_as<T, String_to_string_map::mapped_type>
-  || std::same_as<T, String_to_bool_map::mapped_type>;
-
 struct Options {
   Options() = default;
   ~Options() = default;
