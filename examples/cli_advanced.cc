@@ -6,31 +6,36 @@
 int main(int argc, char* argv[]) {
   try {
     cli::Options options;
-    using Ints = cli::Array_value<int>;
-    using Strings = cli::Array_value<std::string>;
-    using Limits = cli::Map_value<std::string, int>;
-    using Metadata = cli::Map_value<std::string, std::string>;
+
+    using Hosts = cli::Array_value<std::string>;
 
     /* Array options */
-    options.add_option<Strings>({
+    options.add_option<Hosts>({
       .m_long_name = "hosts",
       .m_description = "List of host addresses",
-      .m_default_value = Strings({"localhost:8080", "localhost:8081"}),
+      .m_default_value = Hosts({"localhost:8080", "localhost:8081"}),
       .m_env_var = "APP_HOSTS"
     });
 
-    options.add_option<Ints>({
+    using Ports = cli::Array_value<int>;
+
+    options.add_option<Ports>({
       .m_long_name = "ports",
       .m_description = "List of ports",
-      .m_default_value = Ints({8080, 8081, 8082})
+      .m_default_value = Ports({8080, 8081, 8082})
     });
 
     /* Map options */
+
+    using Limits = cli::Map_value<std::string, int>;
+
     options.add_option<Limits>({
       .m_long_name = "limits",
       .m_description = "Resource limits",
       .m_default_value = Limits({{"cpu", 4}, {"memory", 1024}, {"connections", 100}})
     });
+
+    using Metadata = cli::Map_value<std::string, std::string>;
 
     options.add_option<Metadata>({
       .m_long_name = "metadata",
@@ -44,14 +49,14 @@ int main(int argc, char* argv[]) {
     }
 
     /* Access array values */
-    if (auto hosts = options.get<Strings>("hosts")) {
+    if (auto hosts = options.get<Hosts>("hosts")) {
       log_info("Configured hosts:");
       for (const auto& host : *hosts) {
         log_info("  - ", host);
       }
     }
 
-    if (auto ports = options.get<Ints>("ports")) {
+    if (auto ports = options.get<Ports>("ports")) {
       log_info("Configured ports:");
       for (const auto& port : *ports) {
         log_info("  - ", port);
@@ -63,6 +68,13 @@ int main(int argc, char* argv[]) {
       log_info("Resource limits:");
       for (const auto& [resource, limit] : limits->values()) {
         log_info("  ", resource, ": ", limit);
+      }
+    }
+
+    if (auto metadata = options.get<Metadata>("metadata")) {
+      log_info("Metadata:");
+      for (const auto& [k, v] : *metadata) {
+        log_info("  ", k, ": ", v);
       }
     }
 
