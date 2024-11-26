@@ -17,8 +17,8 @@ target_include_directories(${PROJECT_NAME}
     ${CMAKE_SOURCE_DIR}/logger/include
 )
 
-option(BUILD_TESTING "Build tests" ON)
-option(BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_TESTING "Build tests" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
 
 if(BUILD_EXAMPLES)
   add_subdirectory(examples)

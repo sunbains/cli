@@ -33,25 +33,22 @@ using Value_variant = std::variant<
 
 struct Option_descriptor {
   /* Short option name (e.g., 'v' for -v) */
-  std::string m_short_name;
+  std::string m_short_name{};
 
   /* Long option name (e.g., 'verbose' for --verbose) */
-  std::string m_long_name;
+  std::string m_long_name{};
 
   /* Help text description */
-  std::string m_description;
+  std::string m_description{};
 
   /* Whether the option is required */
   bool m_required{};
 
-  /* Original value from command line */
-  std::string m_original_value;
-
   /* Default value if none provided */
-  std::optional<Value_variant> m_default_value;
+  std::optional<Value_variant> m_default_value{};
 
   /* Environment variable name */
-  std::optional<std::string> m_env_var;
+  std::optional<std::string> m_env_var{};
 };
 
 struct Options {
